@@ -56,6 +56,7 @@ def create_twopunctures_grid(
     minimum_outer_boundary,
     cfl_num=0.45,
     horizon_padding_points=5,
+    step_radii=2,
     skip_radii=None,
     **kwargs,
 ):
@@ -67,11 +68,12 @@ def create_twopunctures_grid(
     The construction of the grid starts by estimating the horizon radius. Then,
     the horizon is covered with ``points_on_horizon_radius``. From there,
     refinement levels are added until the ``minimum_outer_boundary`` is reached.
-    Radii are placed at powers of 2 from the central one, unless the index is
-    in the ``skip_radii`` list. For example, if ``skip_radii = [2, 3]``, and the
-    refinement boundaries are supposed to be ``[1, 2, 4, 8, 16]``, the actual
-    one will be ``[1, 2, 16]``. This is useful to encompass regions of space with
-    the same resolution. Indices are counted from the innermost.
+    Radii are placed at powers of the given ``step_radii`` from the central one,
+    unless the index is in the ``skip_radii`` list. For example, if ``skip_radii
+    = [2, 3]``, and the refinement boundaries are supposed to be ``[1, 2, 4, 8,
+    16]``, the actual one will be ``[1, 2, 16]``. This is useful to encompass
+    regions of space with the same resolution. Indices are counted from the
+    innermost.
 
     This function does nothing fancy about the mass ratio: it simply considers
     the smaller horizon and creates the grid starting from there.
@@ -93,6 +95,12 @@ def create_twopunctures_grid(
     :param horizon_padding_points: Add this number of points to the innermost
                                    refinement level.
     :type horizon_padding_points: int
+
+    :param step_radii: Place radii multiplying the previous one with this value.
+                       For example, if the first radius is at 1, and
+                       ``step_radii`` is 3, the second radius will be 9 and
+                       the third will be 27.
+    :type step_radii: float
 
     :param skip_radii: Do not add to the grid refinement boundaries with these
                        indices.
@@ -146,7 +154,7 @@ def create_twopunctures_grid(
         skip_radii = []
 
     while radius < minimum_outer_boundary:
-        radius = radius0 * 2**radius_number
+        radius = radius0 * step_radii**radius_number
         if radius_number not in skip_radii:
             radii.append(radius)
         radius_number += 1
