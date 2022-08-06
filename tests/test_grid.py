@@ -633,3 +633,14 @@ def test_create_twopuncture_grid():
     ah_m = sqrt(0.3**2 - spin_m**2 - 0.03**2) / 2
     dx_fine = round(ah_m / 40, 4)
     assert grid_tcp.refinement_centers[0].dx_fine == dx_fine
+
+    # Test with step_radii != 2
+
+    grid_tp3 = gr.create_twopunctures_grid(
+        tp,
+        points_on_horizon_radius=40,
+        minimum_outer_boundary=100,
+        step_radii=3,
+    )
+    assert grid_tp3.refinement_centers[0].num_refinement_radii == 6
+    assert grid_tp3.outer_boundary == pytest.approx(108.3456)
